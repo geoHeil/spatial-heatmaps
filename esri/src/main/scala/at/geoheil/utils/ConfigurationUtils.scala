@@ -20,7 +20,7 @@ object ConfigurationUtils {
     SparkSession
       .builder()
       .config(createConf(appName))
-      //  .enableHiveSupport()
+      .enableHiveSupport()
       .getOrCreate()
   }
 

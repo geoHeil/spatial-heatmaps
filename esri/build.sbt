@@ -25,6 +25,7 @@ javaOptions ++= Seq("-Xms512M", "-Xmx2048M", "-XX:+CMSClassUnloadingEnabled")
 parallelExecution in Test := false
 
 lazy val spark = "2.2.0"
+lazy val esriVersion = "2.1.0-SNAPSHOT"
 resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
 resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/maven"
 resolvers += Resolver.mavenLocal
@@ -38,9 +39,8 @@ libraryDependencies ++= Seq(
   //  "org.apache.spark" %% "spark-streaming" % spark % "provided",
 
   // spatial stuff
-  "com.esri.hadoop" % "spatial-sdk-hive" % "2.1.0-SNAPSHOT",
-
-
+  "com.esri.hadoop" % "spatial-sdk-hive" % esriVersion,
+  "com.esri.hadoop" % "spatial-sdk-json" % esriVersion,
 
   //  typesafe configuration
   "com.github.pureconfig" %% "pureconfig" % "0.8.0",

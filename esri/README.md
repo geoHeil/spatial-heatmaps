@@ -26,6 +26,9 @@ simply install with:
 mvn clean install -DskipTests=True
 ```
 
+
+>NOTE: https://stackoverflow.com/questions/40369170/registering-hive-custom-udf-with-spark-spark-sql-2-0-0 you need to have
+spark's hive capabilities to be enabled in order to registers ESRI's hive udfs.
 ## notes regarding spark
 mini project to show how hive sql can easily be executed on spark
 

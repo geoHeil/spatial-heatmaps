@@ -11,6 +11,7 @@ Going along with: https://github.com/Esri/gis-tools-for-hadoop/wiki/Aggregating-
 can be obtained here:
 > The sample data being used are 2013 NYC taxi data. This dataset is freely available for download. For this tutorial, we will only download trip_data_1.csv.zip for simplicity from https://archive.org/download/nycTaxiTripData2013/trip_data.7z.
 
+The whole ZIP could be read by https://stackoverflow.com/questions/28969757/zip-support-in-apache-spark/45958182#45958182, but for simplicity, I will follow along with esri, unzip first and then only load a single file.
 
 ### tools
 **ESRI**

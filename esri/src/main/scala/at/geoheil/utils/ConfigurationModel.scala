@@ -7,6 +7,4 @@ case class ConfigurationInvalidException(
   private val cause: Throwable = None.orNull)
   extends Exception(message, cause)
 
-sealed case class SampleConfig(foo: String) {
-  require(foo.length > 0, "At least some content must be there")
-}
+sealed case class SampleConfig(input: String)
