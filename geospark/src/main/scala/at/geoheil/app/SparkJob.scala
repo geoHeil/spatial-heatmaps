@@ -1,7 +1,7 @@
 // Copyright (C) 2017-2018 geoHeil
 package at.geoheil.app
 
-import at.geoheil.utils.{ HiveUtils, SparkBaseRunner }
+import at.geoheil.utils.SparkBaseRunner
 import org.apache.spark.sql.functions._
 
 import scala.language.postfixOps
@@ -20,10 +20,10 @@ object SparkJob extends SparkBaseRunner {
     .csv(c.input)
 
   // load the Hive functions
-  HiveUtils.createOrReplaceFunction("ST_Point", "com.esri.hadoop.hive.ST_Point", spark = spark)
-  HiveUtils.createOrReplaceFunction("ST_Bin", "com.esri.hadoop.hive.ST_Bin", spark = spark)
-  HiveUtils.createOrReplaceFunction("ST_BinEnvelope", "com.esri.hadoop.hive.ST_BinEnvelope", spark = spark)
-  HiveUtils.createOrReplaceFunction("ST_AsText", "com.esri.hadoop.hive.ST_AsText", spark = spark)
+  createOrReplaceFunction("ST_Point", "com.esri.hadoop.hive.ST_Point")
+  createOrReplaceFunction("ST_Bin", "com.esri.hadoop.hive.ST_Bin")
+  createOrReplaceFunction("ST_BinEnvelope", "com.esri.hadoop.hive.ST_BinEnvelope")
+  createOrReplaceFunction("ST_AsText", "com.esri.hadoop.hive.ST_AsText")
 
   // check for null values in the spacial columns of the data
   println(df.filter('dropoff_latitude isNull).count)
@@ -62,21 +62,32 @@ object SparkJob extends SparkBaseRunner {
   aggregated
     .show
   //  #################################
-  // run ESRI's hive code
+
+  // run ESRI's hive code - does not work
+
+  // TODO why is ESRIs code not found?
+  // ClassNotFoundException: Class com.esri.hadoop.hive.serde.JsonSerde not found
+  // below statement from https://github.com/Esri/gis-tools-for-hadoop/wiki/Aggregating-CSV-Data-%28Spatial-Binning%29 is now invalid i.e. referenced classes are no longer available or renamed
   spark.sql(
     """
-      |CREATE TABLE taxi_agg(area BINARY, count DOUBLE)
-      |ROW FORMAT SERDE 'com.esri.hadoop.hive.serde.EsriJsonSerDe'
-      |STORED AS INPUTFORMAT 'com.esri.json.hadoop.UnenclosedEsriJsonInputFormat'
-      |OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
-    """.stripMargin)
-  spark.sql(
-    """
-      |FROM (SELECT ST_Bin(0.001, ST_Point(dropoff_longitude,dropoff_latitude)) bin_id, *FROM taxi_demo) bins
-      |INSERT OVERWRITE TABLE taxi_agg
-      |SELECT ST_BinEnvelope(0.001, bin_id) shape, COUNT(*) count
-      |GROUP BY bin_id
-    """.stripMargin).show
+        |CREATE TABLE taxi_agg(area BINARY, count DOUBLE)
+        |ROW FORMAT SERDE 'com.esri.hadoop.hive.serde.EsriJsonSerDe'
+        |STORED AS INPUTFORMAT 'com.esri.json.hadoop.UnenclosedJsonInputFormat'
+        |OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat';
+      """.stripMargin).show
+  // trying to simplify create statement - still failing
+  //  spark.sql(
+  //    """
+  //      |CREATE TABLE taxi_agg(area BINARY, count DOUBLE)
+  //      |STORED AS 'com.esri.hadoop.hive.JsonStorageHandler'
+  //    """.stripMargin).show
+  //  spark.sql(
+  //    """
+  //      |FROM (SELECT ST_Bin(0.001, ST_Point(dropoff_longitude,dropoff_latitude)) bin_id, *FROM taxi_demo) bins
+  //      |INSERT OVERWRITE TABLE taxi_agg
+  //      |SELECT ST_BinEnvelope(0.001, bin_id) shape, COUNT(*) count
+  //      |GROUP BY bin_id;
+  //    """.stripMargin).show
 
   //  #################################
   // binary output is not nice to look at, besides that integration of old HIVE functionality (to JSON, partitioning..???)
@@ -102,4 +113,21 @@ object SparkJob extends SparkBaseRunner {
     .option("charset", "UTF-8")
     .option("delimiter", ";")
     .csv(c.output)
+
+  def createOrReplaceFunction(functionName: String, fullyQualifiedClassName: String, namespace: String = "default") = {
+    if (checkIfFunctionAvailable("ST_Bin", namespace) > 0) {
+      spark.sql(s"drop function $functionName")
+      createHiveFunction(functionName, fullyQualifiedClassName)
+    } else {
+      createHiveFunction(functionName, fullyQualifiedClassName)
+    }
+  }
+
+  def checkIfFunctionAvailable(functionName: String, namespace: String) = {
+    spark.sql("SHOW FUNCTIONS").filter('function === lower(lit(s"$namespace.$functionName"))).count
+  }
+
+  def createHiveFunction(functionName: String, fullyQualifiedClassName: String) = {
+    spark.sql(s"create function $functionName as '$fullyQualifiedClassName'")
+  }
 }

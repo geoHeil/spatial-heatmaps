@@ -56,19 +56,20 @@ run in Compile := Defaults.runTask(fullClasspath in Compile, mainClass.in(Compil
 assemblyMergeStrategy in assembly := {
   case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
   case PathList("META-INF", "LICENSE") => MergeStrategy.discard
+  case PathList("META-INF", "LICENSE.txt") => MergeStrategy.discard
   case PathList("META-INF", "NOTICE") => MergeStrategy.discard
+  case PathList("META-INF", "NOTICE.txt") => MergeStrategy.discard
   case PathList("rootdoc.txt") => MergeStrategy.discard
   case _ => MergeStrategy.deduplicate
 }
 
 assemblyShadeRules in assembly := Seq(ShadeRule.rename("shapeless.**" -> "new_shapeless.@1").inAll)
 
-//test in assembly := {}
+test in assembly := {}
 
 initialCommands in console :=
   """
     |import at.geoheil.utils.SparkBaseRunner
-    |import scala.language.postfixOps
     |import org.slf4j.LoggerFactory
     |import org.apache.spark.sql.{ DataFrame, SparkSession }
     |import org.apache.spark.sql.functions._
