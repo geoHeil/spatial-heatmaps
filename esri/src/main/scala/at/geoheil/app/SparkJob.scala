@@ -3,6 +3,7 @@ package at.geoheil.app
 
 import at.geoheil.utils.SparkBaseRunner
 import org.apache.spark.sql.functions._
+
 import scala.language.postfixOps
 
 object SparkJob extends SparkBaseRunner {
@@ -19,22 +20,20 @@ object SparkJob extends SparkBaseRunner {
     .csv(c.input)
 
   // load the Hive functions
-  // run only once - otherwise need to drop
-  //  spark.sql("drop function ST_Bin")
-  //  spark.sql("create function ST_Bin as 'com.esri.hadoop.hive.ST_Bin'")
-  //  spark.sql("create function ST_Point as 'com.esri.hadoop.hive.ST_Point'")
-  //  spark.sql("create function ST_BinEnvelope as 'com.esri.hadoop.hive.ST_BinEnvelope'")
-  //  spark.sql("create function ST_AsText as 'com.esri.hadoop.hive.ST_AsText'")
+  createOrReplaceFunction("ST_Point", "com.esri.hadoop.hive.ST_Point")
+  createOrReplaceFunction("ST_Bin", "com.esri.hadoop.hive.ST_Bin")
+  createOrReplaceFunction("ST_BinEnvelope", "com.esri.hadoop.hive.ST_BinEnvelope")
+  createOrReplaceFunction("ST_AsText", "com.esri.hadoop.hive.ST_AsText")
 
-  // check for null data
+  // check for null values in the spacial columns of the data
   println(df.filter('dropoff_latitude isNull).count)
-  // treat null data
+  // treat it
   val nonNullPoints = df.na.fill(Map("dropoff_latitude" -> 0, "dropoff_longitude" -> 0))
 
   // create a table
   nonNullPoints.createOrReplaceTempView("taxi_demo")
 
-  // try them
+  // try the ESRI udfs
   nonNullPoints.withColumn("point", expr("ST_Point(dropoff_longitude,dropoff_latitude)"))
     .select('dropoff_longitude, 'dropoff_latitude, 'point)
     .show
@@ -64,7 +63,7 @@ object SparkJob extends SparkBaseRunner {
     .show
   //  #################################
 
-  // run ESRI's hive code
+  // run ESRI's hive code - does not work
 
   // TODO why is ESRIs code not found?
   // ClassNotFoundException: Class com.esri.hadoop.hive.serde.JsonSerde not found
@@ -114,4 +113,21 @@ object SparkJob extends SparkBaseRunner {
     .option("charset", "UTF-8")
     .option("delimiter", ";")
     .csv(c.output)
+
+  def createOrReplaceFunction(functionName: String, fullyQualifiedClassName: String, namespace: String = "default") = {
+    if (checkIfFunctionAvailable("ST_Bin", namespace) > 0) {
+      spark.sql(s"drop function $functionName")
+      createHiveFunction(functionName, fullyQualifiedClassName)
+    } else {
+      createHiveFunction(functionName, fullyQualifiedClassName)
+    }
+  }
+
+  def checkIfFunctionAvailable(functionName: String, namespace: String) = {
+    spark.sql("SHOW FUNCTIONS").filter('function === lower(lit(s"$namespace.$functionName"))).count
+  }
+
+  def createHiveFunction(functionName: String, fullyQualifiedClassName: String) = {
+    spark.sql(s"create function $functionName as '$fullyQualifiedClassName'")
+  }
 }
