@@ -43,11 +43,11 @@ object SparkJob extends SparkBaseRunner {
 
   //  #################################
   // reformulate into sparks SQL DSL - I prefer this notation and it is a bit more typesafe
-  // TODO figure out what is different to ESRIs version
-  //  df.withColumn("bin_id", expr("ST_Bin(0.001, ST_Point(dropoff_longitude,dropoff_latitude))"))
-  //    .withColumn("shape", expr("ST_BinEnvelope(0.001, bin_id)"))
-  //    .groupBy('bin_id).agg(count("*"))
-  //    .show
+  df.withColumn("bin_id", expr("ST_Bin(0.001, ST_Point(dropoff_longitude,dropoff_latitude))"))
+    .groupBy('bin_id).agg(count("*"))
+    .withColumn("shape", expr("ST_BinEnvelope(0.001, bin_id)"))
+    .drop("bin_id")
+    .show
   //  #################################
 
   // run ESRI's hive code
