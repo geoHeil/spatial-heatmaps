@@ -7,12 +7,12 @@ sbt assembly
 
 echo "################## Job 1 ###############################################"
 spark-submit --verbose \
-        --class myOrg.SparkJob \
-        --master "local[2]" \
-        --driver-memory=500m \
-        --conf spark.default.parallelism=4 \
+        --class at.geoheil.app.SparkJob \
+        --master "local[*]" \
+        --driver-memory=10G\
+        --conf spark.default.parallelism=12 \
         --conf "spark.driver.extraJavaOptions=-XX:+UseParallelGC -XX:ParallelGCThreads=4" \
-	target/scala-2.11/sparkMiniSample-assembly-0.0.1.SNAPSHOT.jar
+	target/scala-2.11/sparkMiniSample-assembly-0.1-SNAPSHOT.jar
 
 echo "################## Job 1  big############################################"
 error

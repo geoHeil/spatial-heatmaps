@@ -29,6 +29,18 @@ mvn clean install -DskipTests=True
 
 >NOTE: https://stackoverflow.com/questions/40369170/registering-hive-custom-udf-with-spark-spark-sql-2-0-0 you need to have
 spark's hive capabilities to be enabled in order to registers ESRI's hive udfs.
+
+Unlike ESRi (serializing to json using custom hive serdes) I will serialize to WKT (well known text) which 
+probably is easier to integrate into QGIs as well as the hadoop world (partitioning, orc/parquet
+
+Run via the following command - optionally, you can specify some more spark configuration.
+```
+spark-submit --verbose \
+        --class at.geoheil.app.SparkJob \
+	target/scala-2.11/sparkMiniSample-assembly-0.1-SNAPSHOT.jar
+```
+> WARN: currently, this will fail due to shading problems: https://github.com/pureconfig/pureconfig/issues/333
+
 ## notes regarding spark
 mini project to show how hive sql can easily be executed on spark
 

@@ -7,4 +7,4 @@ case class ConfigurationInvalidException(
   private val cause: Throwable = None.orNull)
   extends Exception(message, cause)
 
-sealed case class SampleConfig(input: String)
+sealed case class SampleConfig(input: String, output: String)
