@@ -27,7 +27,7 @@ parallelExecution in Test := false
 lazy val spark = "2.2.0"
 resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
 resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/maven"
-//resolvers += Resolver.mavenLocal
+resolvers += Resolver.mavenLocal
 libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-core" % spark % "provided",
   "org.apache.spark" %% "spark-sql" % spark % "provided",
@@ -36,6 +36,11 @@ libraryDependencies ++= Seq(
   //  "org.apache.spark" %% "spark-graphx" % spark % "provided",
   //  "org.apache.spark" %% "spark-mllib" % spark % "provided",
   //  "org.apache.spark" %% "spark-streaming" % spark % "provided",
+
+  // spatial stuff
+  "com.esri.hadoop" % "spatial-sdk-hive" % "2.1.0-SNAPSHOT",
+
+
 
   //  typesafe configuration
   "com.github.pureconfig" %% "pureconfig" % "0.8.0",
@@ -48,10 +53,11 @@ fork := true
 fullClasspath in reStart := (fullClasspath in Compile).value
 run in Compile := Defaults.runTask(fullClasspath in Compile, mainClass.in(Compile, run), runner.in(Compile, run)).evaluated
 
-// outlining some dummy assembly configuration
 assemblyMergeStrategy in assembly := {
-  //  case PathList("com", "esotericsoftware", xs@_*) => MergeStrategy.last
   case PathList("META-INF", "MANIFEST.MF") => MergeStrategy.discard
+  case PathList("META-INF", "LICENSE") => MergeStrategy.discard
+  case PathList("META-INF", "NOTICE") => MergeStrategy.discard
+  case PathList("rootdoc.txt") => MergeStrategy.discard
   case _ => MergeStrategy.deduplicate
 }
 
