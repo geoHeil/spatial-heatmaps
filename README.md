@@ -5,6 +5,7 @@ building heatmpas for large amounts of spatial data in different tools:
 - esri
 - geospark
 - geomesa
+- https://github.com/uber/deck.gl ?
 
 ## the data
 Going along with: https://github.com/Esri/gis-tools-for-hadoop/wiki/Aggregating-CSV-Data-%28Spatial-Binning%29 the data
