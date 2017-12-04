@@ -5,6 +5,7 @@ package at.geoheil.utils
 import org.apache.spark.SparkConf
 import org.apache.spark.serializer.KryoSerializer
 import org.apache.spark.sql.SparkSession
+//import org.datasyslab.geospark.serde.GeoSparkKryoRegistrator
 import pureconfig._
 
 object ConfigurationUtils {
@@ -20,7 +21,7 @@ object ConfigurationUtils {
     SparkSession
       .builder()
       .config(createConf(appName))
-      .enableHiveSupport()
+      //      .enableHiveSupport()
       .getOrCreate()
   }
 
@@ -33,6 +34,7 @@ object ConfigurationUtils {
       .setIfMissing("spark.driver.maxResultSize", "1G")
       .setIfMissing("spark.speculation", "true")
       .setIfMissing("spark.serializer", classOf[KryoSerializer].getCanonicalName)
+      //      .set("spark.kryo.registrator", classOf[GeoSparkKryoRegistrator].getCanonicalName)
       .setIfMissing("spark.kryoserializer.buffer.max", "1G")
       .setIfMissing("spark.kryo.unsafe", "true")
       .setIfMissing("spark.kryo.referenceTracking", "false")

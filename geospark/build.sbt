@@ -25,7 +25,6 @@ javaOptions ++= Seq("-Xms512M", "-Xmx2048M", "-XX:+CMSClassUnloadingEnabled")
 parallelExecution in Test := false
 
 lazy val spark = "2.2.0"
-lazy val esriVersion = "2.1.0-SNAPSHOT"
 resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
 resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/maven"
 resolvers += Resolver.mavenLocal
@@ -39,16 +38,15 @@ libraryDependencies ++= Seq(
   //  "org.apache.spark" %% "spark-streaming" % spark % "provided",
 
   // spatial stuff
-  "com.esri.hadoop" % "spatial-sdk-hive" % esriVersion,
-  "com.esri.hadoop" % "spatial-sdk-json" % esriVersion,
+  "org.datasyslab" % "babylon" % "0.2.2",
+  "org.datasyslab" % "geospark" % "0.9.1",
 
-//  typesafe configuration
+  //  typesafe configuration
   "com.github.pureconfig" %% "pureconfig" % "0.8.0",
 
   // testing
   "com.holdenkarau" %% "spark-testing-base" % s"${spark}_0.8.0" % "test"
 )
-
 fork := true
 fullClasspath in reStart := (fullClasspath in Compile).value
 run in Compile := Defaults.runTask(fullClasspath in Compile, mainClass.in(Compile, run), runner.in(Compile, run)).evaluated
@@ -59,8 +57,11 @@ assemblyMergeStrategy in assembly := {
   case PathList("META-INF", "LICENSE.txt") => MergeStrategy.discard
   case PathList("META-INF", "NOTICE") => MergeStrategy.discard
   case PathList("META-INF", "NOTICE.txt") => MergeStrategy.discard
+  case PathList("META-INF", "com.fasterxml.jackson", xs@_*) => MergeStrategy.first
   case PathList("rootdoc.txt") => MergeStrategy.discard
-  case _ => MergeStrategy.deduplicate
+//  case PathList("com.fasterxml.jackson", xs@_*) => MergeStrategy.first // geospark & babylon dirty fix
+//  case _ => MergeStrategy.deduplicate
+  case _ => MergeStrategy.first //TODO dirty fix https://github.com/jiayuasu/GeoSparkTemplateProject/issues/1
 }
 
 assemblyShadeRules in assembly := Seq(ShadeRule.rename("shapeless.**" -> "new_shapeless.@1").inAll)
