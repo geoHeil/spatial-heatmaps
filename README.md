@@ -17,3 +17,6 @@ The whole ZIP could be read by https://stackoverflow.com/questions/28969757/zip-
 **ESRI**
 - marries open source (hadoop connector) with their proprietatry visualization tool
 I demonstrate how to use their libraries - but visualize in an open tool like qgis
+
+The result looks like:
+![NY Taxi Spark](img/spark-esri-qgis.png "NY Taxi Spark")
