@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 trait SparkBaseRunner extends App {
 
   @transient lazy val logger = LoggerFactory.getLogger(this.getClass)
-//  val c = ConfigurationUtils.loadConfiguration[SampleConfig]
+  //  val c = ConfigurationUtils.loadConfiguration[SampleConfig]
 
   def createSparkSession(appName: String): SparkSession = {
     ConfigurationUtils.createSparkSession(appName)
